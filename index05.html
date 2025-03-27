@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stok Takip</title>
+    <style>
+        body {
+            background-color: #f8c7d7; /* Pembe arka plan */
+            font-family: Arial, sans-serif; /* Arial yazı fontu */
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #ff88a1;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #ff4e7a;
+        }
+        table {
+            width: 80%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #ff88a1;
+            color: white;
+        }
+        td {
+            background-color: #fff2f2;
+        }
+        .stokDusur {
+            background-color: #ff4e7a;
+            color: white;
+            cursor: pointer;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .stokDusur:hover {
+            background-color: #ff1e3a;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Stok Takip Sistemi</h1>
+
+    <label for="urunAd">Ürün Adı:</label>
+    <input type="text" id="urunAd" placeholder="Ürün Adı">
+    
+    <label for="urunStok">Stok Adedi:</label>
+    <input type="number" id="urunStok" placeholder="Stok Adedi">
+    
+    <button onclick="stokEkle()">Stok Ekle</button>
+
+    <h2>Stoklar:</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Ürün Adı</th>
+                <th>Stok Adedi</th>
+                <th>Stok Düşür</th>
+            </tr>
+        </thead>
+        <tbody id="stokListesi"></tbody>
+    </table>
+
+    <script>
+        // Sayfa yüklendiğinde stokları kontrol et ve listele
+        window.onload = function() {
+            listeyiGoster();
+        }
+
+        // Stok ekleme fonksiyonu
+        function stokEkle() {
+            const urunAd = document.getElementById('urunAd').value;
+            const urunStok = document.getElementById('urunStok').value;
+
+            if (urunAd && urunStok) {
+                let stoklar = JSON.parse(localStorage.getItem('stoklar')) || [];
+                
+                stoklar.push({ ad: urunAd, stok: parseInt(urunStok) });
+                
+                // Stokları LocalStorage'e kaydet
+                localStorage.setItem('stoklar', JSON.stringify(stoklar));
+                
+                // Listeyi tekrar güncelle
+                listeyiGoster();
+
+                // Input alanlarını temizle
+                document.getElementById('urunAd').value = '';
+                document.getElementById('urunStok').value = '';
+            } else {
+                alert("Lütfen ürün adı ve stok adedi girin.");
+            }
+        }
+
+        // Stokları ekranda listeleme fonksiyonu
+        function listeyiGoster() {
+            const stoklar = JSON.parse(localStorage.getItem('stoklar')) || [];
+            const stokListesi = document.getElementById('stokListesi');
+            stokListesi.innerHTML = ''; // Listeyi temizle
+
+            stoklar.forEach(function(urun, index) {
+                const tr = document.createElement('tr');
+                const tdAd = document.createElement('td');
+                tdAd.textContent = urun.ad;
+                const tdStok = document.createElement('td');
+                tdStok.textContent = urun.stok;
+                
+                // Stok Düşür butonu
+                const tdDusur = document.createElement('td');
+                const dusurButton = document.createElement('button');
+                dusurButton.textContent = 'Stok Düşür';
+                dusurButton.className = 'stokDusur';
+                dusurButton.onclick = function() { stokDusur(index); };
+
+                tdDusur.appendChild(dusurButton);
+                tr.appendChild(tdAd);
+                tr.appendChild(tdStok);
+                tr.appendChild(tdDusur);
+                stokListesi.appendChild(tr);
+            });
+        }
+
+        // Stok düşürme fonksiyonu
+        function stokDusur(index) {
+            let stoklar = JSON.parse(localStorage.getItem('stoklar')) || [];
+            if (stoklar[index].stok > 0) {
+                stoklar[index].stok -= 1; // Stok adedini 1 azalt
+                // Güncellenmiş stokları LocalStorage'e kaydet
+                localStorage.setItem('stoklar', JSON.stringify(stoklar));
+                listeyiGoster(); // Listeyi güncelle
+            } else {
+                alert("Stok miktarı sıfır, daha fazla düşürülemez!");
+            }
+        }
+    </script>
+
+</body>
+</html>
